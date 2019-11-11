@@ -1,0 +1,5 @@
+{
+  "wifiap": [
+    { "id": 1, "ssid": "aruba-dev", "rssi": 1.01 }
+  ]
+}
