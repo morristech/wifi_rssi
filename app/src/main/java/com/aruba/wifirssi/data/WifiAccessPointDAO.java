@@ -18,7 +18,7 @@ public interface WifiAccessPointDAO {
     List<WifiAccessPoint> loadAllByIds(int[] ids);
 
     @Query("SELECT * FROM wifi_access_points WHERE wifi_ssid LIKE :ssid LIMIT 1")
-    WifiAccessPoint findByName(String ssid);
+    WifiAccessPoint findBySsid(String ssid);
 
     @Insert
     void insertAll(WifiAccessPoint... accessPoints);
