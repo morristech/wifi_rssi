@@ -23,3 +23,6 @@ Lastly we iterate  through the list of results returned by the WifiManager’s g
 | [Retrofit](https://square.github.io/retrofit/) |  A type-safe HTTP client for Android and Java. |
 | [Moshi](https://github.com/square/moshi) | Moshi is a JSON library for Android to parse JSON into Java objects. |
 | [Room](https://developer.android.com/topic/libraries/architecture/room) | A persistence library provides an abstraction layer over SQLite. |
+
+### Screen shot
+
