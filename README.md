@@ -25,4 +25,4 @@ Lastly we iterate  through the list of results returned by the WifiManager’s g
 | [Room](https://developer.android.com/topic/libraries/architecture/room) | A persistence library provides an abstraction layer over SQLite. |
 
 ### Screen shot
-
+![Screenshot_1573642267](https://raw.githubusercontent.com/morristech/wifi_rssi/master/Screenshot_1573642267.png)
