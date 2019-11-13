@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.aruba.wifirssi.adapter.WifiAccessPointListAdapter;
 import com.aruba.wifirssi.data.AppDatabase;
+import com.aruba.wifirssi.data.WifiAccessPointDAO;
 import com.aruba.wifirssi.data.api.WifiRemoteDataSource;
 import com.aruba.wifirssi.model.WifiAccessPoint;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -30,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -51,23 +54,27 @@ public class MainActivity extends AppCompatActivity {
     private AppDatabase database;
     private WifiManager wifiManager;
 
-    private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
+    @VisibleForTesting
+    final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(intent.getAction())) {
                 List<ScanResult> scanResults = wifiManager.getScanResults();
                 unregisterReceiver(this);
+                hasScanStarted = false;
                 for (ScanResult scanning : scanResults) {
                     final WifiAccessPoint accessPoint = new WifiAccessPoint();
                     accessPoint.setSsid(scanning.SSID);
                     accessPoint.setRssi((double) scanning.level);
-                    wifiAccessPoints.add(accessPoint);
                     if (database != null) {
-                        database.accessPointDao().insertAll(accessPoint);
+                        WifiAccessPointDAO accessPointDao = database.accessPointDao();
+                        accessPointDao.insertAll(accessPoint);
+                        wifiAccessPoints.add(accessPointDao.findBySsid(scanning.SSID));
                     }
-                    //// TODO: 2019-11-13 Get access point from db then send it to api
-                    addAccessPointToRemote(accessPoint);
                     Log.d(TAG, "onReceive: " + "SSID:" + "\n" + accessPoint.getSsid() + "\n" + "RSSI:" + accessPoint.getRssi());
+                }
+                for (WifiAccessPoint wifiAccessPoint : wifiAccessPoints) {
+                    addAccessPointToRemote(wifiAccessPoint);
                 }
                 if (listAdapter != null) {
                     listAdapter.notifyDataSetChanged();
@@ -132,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         unregisterReceiver(wifiScanReceiver);
+        hasScanStarted = false;
         super.onPause();
     }
 
@@ -188,6 +196,15 @@ public class MainActivity extends AppCompatActivity {
                 t.getMessage();
             }
         });
+    }
+
+    private WifiAccessPoint getDummyAccessPoint() {
+        Random random = new Random();
+        WifiAccessPoint accessPoint = new WifiAccessPoint();
+        accessPoint.setId(random.nextInt(Integer.MAX_VALUE));
+        accessPoint.setSsid("Dummy Access Point");
+        accessPoint.setRssi(60.50);
+        return accessPoint;
     }
 
 }
